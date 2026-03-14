@@ -17,16 +17,27 @@ jobs:
         id: version
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
 
-      - name: Build
-        run: swift build -c release
+      - name: Build app
+        run: |
+          xcodebuild -project ZaiSubscriptionWidget.xcodeproj \
+            -scheme ZaiSubscriptionWidget \
+            -configuration Release \
+            -derivedDataPath build \
+            clean build
 
       - name: Create DMG
         run: |
+          APP_PATH="build/Build/Products/Release/ZaiSubscriptionWidget.app"
+          DMG_NAME="ZaiSubscriptionWidget-${{ steps.version.outputs.VERSION }}.dmg"
+          
           mkdir -p dmg_temp
-          cp .build/release/ZaiSubscriptionWidget dmg_temp/
+          cp -R "$APP_PATH" dmg_temp/
+          ln -s /Applications dmg_temp/Applications
+          
           hdiutil create -volname "Z.AI Subscription Widget" \
-            -srcfolder dmg_temp -ov -format UDZO \
-            "ZaiSubscriptionWidget-${{ steps.version.outputs.VERSION }}.dmg"
+            -srcfolder dmg_temp \
+            -ov -format UDZO \
+            "$DMG_NAME"
 
       - name: Upload DMG
         uses: softprops/action-gh-release@v1

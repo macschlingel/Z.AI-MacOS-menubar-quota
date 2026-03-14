@@ -22,10 +22,22 @@
 ## Requirements
 
 - macOS 13.0 (Ventura) or later
-- Xcode 15.0 or later
 - Z.AI API key
 
-## Building
+## Installation
+
+1. Download the latest `ZaiSubscriptionWidget-*.dmg` from [Releases](https://github.com/anomalyco/zai-subscripton-info/releases)
+2. Open the DMG file
+3. Drag `ZaiSubscriptionWidget.app` to the `Applications` folder
+4. **First launch**: Right-click the app in Applications and select "Open" → "Open" (required for unsigned apps)
+
+> **Note**: This app is not signed with an Apple Developer certificate. On first launch, macOS may show a warning. Use the Right-click → Open method to bypass Gatekeeper.
+
+## Building from Source
+
+### Requirements
+
+- Xcode 15.0 or later
 
 ### Option 1: Xcode
 
@@ -33,20 +45,16 @@
 2. Select "ZaiSubscriptionWidget" scheme
 3. Build and run (⌘R)
 
-### Option 2: Swift Package Manager
+### Option 2: Command Line
 
 ```bash
-swift build -c release
+xcodebuild -project ZaiSubscriptionWidget.xcodeproj \
+  -scheme ZaiSubscriptionWidget \
+  -configuration Release \
+  build
 ```
 
-The executable will be at `.build/release/ZaiSubscriptionWidget`
-
-### Option 3: Generate Xcode Project
-
-```bash
-swift package generate-xcodeproj
-open ZaiSubscriptionWidget.xcodeproj
-```
+The app will be at `build/Build/Products/Release/ZaiSubscriptionWidget.app`
 
 ## Setup
 

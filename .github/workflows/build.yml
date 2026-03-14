@@ -11,5 +11,23 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build
-        run: swift build -c release
+
+      - name: Build app
+        run: |
+          xcodebuild -project ZaiSubscriptionWidget.xcodeproj \
+            -scheme ZaiSubscriptionWidget \
+            -configuration Release \
+            -derivedDataPath build \
+            clean build
+
+      - name: Verify app bundle
+        run: |
+          APP_PATH="build/Build/Products/Release/ZaiSubscriptionWidget.app"
+          if [ -d "$APP_PATH" ]; then
+            echo "✅ App bundle created successfully"
+            ls -la "$APP_PATH"
+          else
+            echo "❌ App bundle not found at $APP_PATH"
+            find build -name "*.app" 2>/dev/null || true
+            exit 1
+          fi
