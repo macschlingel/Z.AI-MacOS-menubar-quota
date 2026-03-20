@@ -25,14 +25,14 @@ struct MenuBarView: View {
     
     private var noAPIKeyView: some View {
         VStack(spacing: 12) {
-            Image(systemName: "key.fill")
+            Image(systemName: "person.badge.plus")
                 .font(.largeTitle)
                 .foregroundColor(.secondary)
             
-            Text("API Key Required")
+            Text("Add an Account")
                 .font(.headline)
             
-            Text("Add your Z.AI API key in Settings to view usage.")
+            Text("Add your Z.AI account in Settings to view usage.")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -59,6 +59,10 @@ struct MenuBarView: View {
     
     private var contentView: some View {
         VStack(alignment: .leading, spacing: 16) {
+            // Account picker header
+            accountPickerView
+            
+            Divider()
             quotaSection
             
             if let error = viewModel.error {
@@ -68,6 +72,34 @@ struct MenuBarView: View {
             
             Divider()
             footerView
+        }
+    }
+    
+    private var accountPickerView: some View {
+        Group {
+            if viewModel.accounts.count > 1 {
+                // Show picker when multiple accounts exist
+                Picker("", selection: Binding(
+                    get: { viewModel.activeAccount ?? Account(name: "", apiKey: "") },
+                    set: { viewModel.switchToAccount($0) }
+                )) {
+                    ForEach(viewModel.accounts) { account in
+                        Text(account.name).tag(account)
+                    }
+                }
+                .pickerStyle(.menu)
+                .frame(maxWidth: .infinity)
+            } else if let account = viewModel.activeAccount {
+                // Show single account name when only one exists
+                HStack {
+                    Image(systemName: "person.circle.fill")
+                        .foregroundColor(.secondary)
+                    Text(account.name)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                }
+            }
         }
     }
     
