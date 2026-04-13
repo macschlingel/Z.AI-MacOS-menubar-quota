@@ -104,35 +104,49 @@ struct MenuBarView: View {
     }
     
     private var quotaSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 12) {
             Text("Quota Usage")
                 .font(.headline)
             
-            ForEach(viewModel.quotaLimits.filter { $0.isToken5HourLimit || $0.isTokenWeeklyLimit || $0.isTimeLimit }) { limit in
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack {
-                        Text(limit.displayType)
-                            .font(.subheadline)
-                        Spacer()
-                        Text(limit.formattedPercentage)
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                    }
-                    
-                    GeometryReader { geometry in
-                        ZStack(alignment: .leading) {
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill(Color.secondary.opacity(0.2))
-                                .frame(height: 8)
-                            
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill(progressColor(for: limit.percentageValue))
-                                .frame(width: geometry.size.width * min(limit.percentageValue / 100, 1), height: 8)
-                        }
-                    }
-                    .frame(height: 8)
-                }
+            HStack(alignment: .bottom, spacing: 24) {
+                quotaBar(label: "5", limit: viewModel.quotaLimits.first { $0.isToken5HourLimit })
+                quotaBar(label: "w", limit: viewModel.quotaLimits.first { $0.isTokenWeeklyLimit })
+                quotaBar(label: "m", limit: viewModel.quotaLimits.first { $0.isTimeLimit })
             }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 4)
+        }
+    }
+    
+    private func quotaBar(label: String, limit: QuotaLimitItem?) -> some View {
+        VStack(spacing: 6) {
+            if let limit = limit {
+                Text(String(format: "%.0f%%", limit.percentageValue))
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundColor(.secondary)
+                
+                ZStack(alignment: .bottom) {
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(Color.secondary.opacity(0.15))
+                        .frame(width: 14, height: 80)
+                    
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(progressColor(for: limit.percentageValue))
+                        .frame(width: 14, height: 80 * min(limit.percentageValue / 100, 1))
+                }
+                .help("\(limit.displayType): \(limit.formattedPercentage)")
+            } else {
+                Text("N/A")
+                    .font(.system(size: 10))
+                    .foregroundColor(.secondary)
+                
+                RoundedRectangle(cornerRadius: 3)
+                    .fill(Color.secondary.opacity(0.1))
+                    .frame(width: 14, height: 80)
+            }
+            
+            Text(label)
+                .font(.system(size: 12, weight: .bold))
         }
     }
     
