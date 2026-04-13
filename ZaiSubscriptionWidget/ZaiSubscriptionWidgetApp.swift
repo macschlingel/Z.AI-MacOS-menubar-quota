@@ -25,7 +25,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             settingsWindow = window
         }
         
-        NSApp.setActivationPolicy(.regular)
+        if UsageViewModel.shared.showDockIcon {
+            NSApp.setActivationPolicy(.regular)
+        } else {
+            NSApp.setActivationPolicy(.accessory)
+        }
+        
         NSApp.activate(ignoringOtherApps: true)
         settingsWindow?.makeKeyAndOrderFront(nil)
     }

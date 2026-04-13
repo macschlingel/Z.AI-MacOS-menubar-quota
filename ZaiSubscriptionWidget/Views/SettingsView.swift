@@ -59,6 +59,13 @@ struct SettingsView: View {
                 .disabled(!viewModel.autoRefreshEnabled)
             }
             
+            Section("Appearance") {
+                Toggle("Show Dock Icon", isOn: $viewModel.showDockIcon)
+                Text("When disabled, the app runs only in the menu bar. The dock icon will still be hidden when the settings window is open.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            
             if showingSaveConfirmation {
                 HStack {
                     Image(systemName: "checkmark.circle.fill")
