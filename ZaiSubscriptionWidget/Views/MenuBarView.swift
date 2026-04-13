@@ -2,104 +2,78 @@ import SwiftUI
 
 struct MenuBarView: View {
     @ObservedObject var viewModel: UsageViewModel
-    var onOpenSettings: () -> Void
+    let onOpenSettings: () -> Void
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            if !viewModel.hasAPIKey {
-                noAPIKeyView
-            } else if viewModel.isLoading && viewModel.quotaLimits.isEmpty {
-                loadingView
-            } else {
-                contentView
-            }
-        }
-        .padding()
-        .frame(width: 320)
-        .onAppear {
-            if viewModel.hasAPIKey && viewModel.quotaLimits.isEmpty {
-                Task { await viewModel.refresh() }
-            }
-        }
-    }
-    
-    private var noAPIKeyView: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "person.badge.plus")
-                .font(.largeTitle)
-                .foregroundColor(.secondary)
-            
-            Text("Add an Account")
-                .font(.headline)
-            
-            Text("Add your Z.AI account in Settings to view usage.")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-            
-            Button("Open Settings") {
-                onOpenSettings()
-            }
-            .buttonStyle(.borderedProminent)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 20)
-    }
-    
-    private var loadingView: some View {
-        VStack(spacing: 12) {
-            ProgressView()
-                .scaleEffect(1.2)
-            Text("Loading usage data...")
-                .foregroundColor(.secondary)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 40)
-    }
-    
-    private var contentView: some View {
         VStack(alignment: .leading, spacing: 16) {
-            // Account picker header
-            accountPickerView
+            headerView
             
             Divider()
-            quotaSection
             
-            if let error = viewModel.error {
-                Divider()
+            if let error = viewModel.lastError {
                 errorView(error)
+            } else if viewModel.quotaLimits.isEmpty {
+                if viewModel.isLoading {
+                    HStack {
+                        Spacer()
+                        ProgressView("Loading quota...")
+                            .scaleEffect(0.8)
+                        Spacer()
+                    }
+                } else {
+                    Text("No quota information available.")
+                        .foregroundColor(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                }
+            } else {
+                quotaSection
             }
             
             Divider()
+            
             footerView
         }
+        .padding()
+        .frame(width: 300)
     }
     
-    private var accountPickerView: some View {
-        Group {
-            if viewModel.accounts.count > 1 {
-                // Show picker when multiple accounts exist
-                Picker("", selection: Binding(
-                    get: { viewModel.activeAccount ?? Account(name: "", apiKey: "") },
-                    set: { viewModel.switchToAccount($0) }
-                )) {
-                    ForEach(viewModel.accounts) { account in
-                        Text(account.name).tag(account)
+    private var headerView: some View {
+        HStack {
+            Image("MenuBarIcon")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 20, height: 20)
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Z.AI Subscription")
+                    .font(.headline)
+                
+                if let account = viewModel.currentAccount {
+                    HStack(spacing: 4) {
+                        Text(account.email)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        
+                        if viewModel.accounts.count > 1 {
+                            Menu {
+                                ForEach(viewModel.accounts) { acc in
+                                    Button(acc.email) {
+                                        viewModel.switchAccount(acc)
+                                    }
+                                }
+                            } label: {
+                                Image(systemName: "chevron.up.down")
+                                    .font(.system(size: 8))
+                                    .foregroundColor(.secondary)
+                            }
+                            .menuStyle(.borderlessButton)
+                            .fixedSize()
+                        }
                     }
                 }
-                .pickerStyle(.menu)
-                .frame(maxWidth: .infinity)
-            } else if let account = viewModel.activeAccount {
-                // Show single account name when only one exists
-                HStack {
-                    Image(systemName: "person.circle.fill")
-                        .foregroundColor(.secondary)
-                    Text(account.name)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                    Spacer()
-                }
             }
+            
+            Spacer()
         }
     }
     
@@ -132,6 +106,25 @@ struct MenuBarView: View {
                     }
                     .frame(height: 8)
                 }
+            }
+            
+            // Reached limits reset indicators
+            let reachedLimits = viewModel.quotaLimits.filter { ($0.isToken5HourLimit || $0.isTokenWeeklyLimit || $0.isTimeLimit) && $0.isReached }
+            if !reachedLimits.isEmpty {
+                VStack(alignment: .leading, spacing: 6) {
+                    ForEach(reachedLimits) { limit in
+                        HStack(spacing: 6) {
+                            Image(systemName: "clock.badge.exclamationmark")
+                                .foregroundColor(.red)
+                                .font(.caption)
+                            
+                            Text("\(limit.displayType.replacingOccurrences(of: " Usage", with: "")) reset in \(limit.formattedResetTime ?? "a few minutes")")
+                                .font(.system(size: 11))
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+                .padding(.top, 4)
             }
         }
     }
