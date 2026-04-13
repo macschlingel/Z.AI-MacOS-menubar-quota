@@ -87,6 +87,51 @@ class UsageViewModel: ObservableObject {
         }
     }
     
+    enum CostWindow {
+        case peak
+        case offPeak
+        
+        var multiplier: Int {
+            switch self {
+            case .peak: return 3
+            case .offPeak:
+                // Benefit: 1x through end of April 2026
+                let now = Date()
+                var components = DateComponents()
+                components.year = 2026
+                components.month = 5
+                components.day = 1
+                if let endOfApril = Calendar.current.date(from: components), now < endOfApril {
+                    return 1
+                }
+                return 2
+            }
+        }
+        
+        var displayName: String {
+            switch self {
+            case .peak: return "Peak"
+            case .offPeak: return "Off-Peak"
+            }
+        }
+    }
+    
+    var currentCostWindow: CostWindow {
+        var calendar = Calendar.current
+        if let timezone = TimeZone(identifier: "Asia/Shanghai") {
+            calendar.timeZone = timezone
+        }
+        
+        let now = Date()
+        let hour = calendar.component(.hour, from: now)
+        
+        if hour >= 14 && hour < 18 {
+            return .peak
+        } else {
+            return .offPeak
+        }
+    }
+    
     private init() {
         loadSavedSettings()
         updateTimer()
