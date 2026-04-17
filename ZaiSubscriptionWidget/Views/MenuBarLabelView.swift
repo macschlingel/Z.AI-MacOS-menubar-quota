@@ -4,48 +4,31 @@ struct MenuBarLabelView: View {
     @ObservedObject var viewModel: UsageViewModel
     
     var body: some View {
-        HStack(spacing: 6) {
-            // Vertical Progress Bars
-            HStack(alignment: .bottom, spacing: 1.5) {
-                ForEach(["5", "w", "m"], id: \.self) { label in
-                    VStack(spacing: 1) {
-                        miniProgressBar(limit: getLimit(for: label))
-                        Text(label)
-                            .font(.system(size: 6, weight: .bold))
-                            .foregroundColor(.primary)
-                    }
-                }
+        HStack(spacing: 7) {
+            // 1. Progress Bars Group
+            HStack(alignment: .bottom, spacing: 2) {
+                barGroup(label: "5", limit: viewModel.quotaLimits.first { $0.isToken5HourLimit })
+                barGroup(label: "w", limit: viewModel.quotaLimits.first { $0.isTokenWeeklyLimit })
+                barGroup(label: "m", limit: viewModel.quotaLimits.first { $0.isTimeLimit })
             }
-            .padding(.trailing, 2)
             
-            // LIMIT Section
+            // 2. LIMIT Section (Only if reached)
             if let reachedLimit = viewModel.quotaLimits.first(where: { $0.isReached && ($0.isToken5HourLimit || $0.isTokenWeeklyLimit || $0.isTimeLimit) }) {
-                VStack(alignment: .leading, spacing: -2) {
+                VStack(alignment: .leading, spacing: -1) {
                     Text("LIMIT")
                         .font(.system(size: 7, weight: .black))
                         .foregroundColor(.red)
                     
                     if let resetTime = reachedLimit.formattedResetTime {
-                        let parts = resetTime.components(separatedBy: " ")
-                        HStack(spacing: 2) {
-                            ForEach(parts, id: \.self) { part in
-                                let value = part.filter { "0123456789".contains($0) }
-                                let unit = part.filter { !"0123456789".contains($0) }
-                                HStack(alignment: .bottom, spacing: 0) {
-                                    Text(value)
-                                        .font(.system(size: 9, weight: .bold, design: .monospaced))
-                                    Text(unit)
-                                        .font(.system(size: 6, weight: .bold))
-                                }
-                                .foregroundColor(.red)
-                            }
-                        }
+                        Text(resetTime)
+                            .font(.system(size: 9, weight: .bold, design: .monospaced))
+                            .foregroundColor(.red)
                     }
                 }
             }
             
-            // GLM-5 Section
-            VStack(alignment: .center, spacing: -2) {
+            // 3. GLM-5 Section
+            VStack(alignment: .center, spacing: -1) {
                 Text("GLM-5")
                     .font(.system(size: 7, weight: .bold))
                     .foregroundColor(.secondary)
@@ -55,29 +38,31 @@ struct MenuBarLabelView: View {
                     .foregroundColor(viewModel.currentCostWindow == .peak ? .orange : .primary)
             }
         }
-        .padding(.horizontal, 4)
+        .padding(.horizontal, 7)
+        .padding(.vertical, 3)
+        .background(Color.primary.opacity(0.08))
+        .cornerRadius(4)
+        // Ensure macOS treats the whole thing as a single renderable unit
+        .compositingGroup()
     }
     
-    private func getLimit(for label: String) -> QuotaLimitItem? {
-        switch label {
-        case "5": return viewModel.quotaLimits.first { $0.isToken5HourLimit }
-        case "w": return viewModel.quotaLimits.first { $0.isTokenWeeklyLimit }
-        case "m": return viewModel.quotaLimits.first { $0.isTimeLimit }
-        default: return nil
-        }
-    }
-    
-    private func miniProgressBar(limit: QuotaLimitItem?) -> some View {
-        ZStack(alignment: .bottom) {
-            RoundedRectangle(cornerRadius: 0.5)
-                .fill(Color.primary.opacity(0.15))
-                .frame(width: 3.5, height: 12)
-            
-            if let limit = limit {
+    private func barGroup(label: String, limit: QuotaLimitItem?) -> some View {
+        VStack(spacing: 1) {
+            ZStack(alignment: .bottom) {
                 RoundedRectangle(cornerRadius: 0.5)
-                    .fill(progressColor(for: limit.percentageValue))
-                    .frame(width: 3.5, height: 12 * min(limit.percentageValue / 100, 1))
+                    .fill(Color.primary.opacity(0.2))
+                    .frame(width: 3.5, height: 11)
+                
+                if let limit = limit {
+                    RoundedRectangle(cornerRadius: 0.5)
+                        .fill(progressColor(for: limit.percentageValue))
+                        .frame(width: 3.5, height: 11 * min(limit.percentageValue / 100, 1))
+                }
             }
+            
+            Text(label)
+                .font(.system(size: 6, weight: .heavy))
+                .foregroundColor(.primary)
         }
     }
     
