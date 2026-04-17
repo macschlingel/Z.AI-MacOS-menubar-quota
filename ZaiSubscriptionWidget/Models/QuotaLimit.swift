@@ -45,6 +45,30 @@ struct QuotaLimitItem: Codable, Identifiable {
     var formattedPercentage: String {
         String(format: "%.1f%%", percentageValue)
     }
+    
+    var isReached: Bool {
+        percentageValue >= 100 || (remaining ?? 1) == 0
+    }
+    
+    var resetTimeRemaining: TimeInterval? {
+        guard let resetTime = nextResetTime else { return nil }
+        let date = Date(timeIntervalSince1970: Double(resetTime) / 1000.0)
+        let diff = date.timeIntervalSince(Date())
+        return diff > 0 ? diff : nil
+    }
+    
+    var formattedResetTime: String? {
+        guard let diff = resetTimeRemaining else { return nil }
+        
+        let hours = Int(diff) / 3600
+        let minutes = (Int(diff) % 3600) / 60
+        
+        if hours > 0 {
+            return "\(hours)h \(minutes)m"
+        } else {
+            return "\(minutes)m"
+        }
+    }
 }
 
 struct UsageDetail: Codable {

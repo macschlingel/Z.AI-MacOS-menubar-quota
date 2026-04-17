@@ -25,7 +25,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             settingsWindow = window
         }
         
-        NSApp.setActivationPolicy(.regular)
+        if UsageViewModel.shared.showDockIcon {
+            NSApp.setActivationPolicy(.regular)
+        } else {
+            NSApp.setActivationPolicy(.accessory)
+        }
+        
         NSApp.activate(ignoringOtherApps: true)
         settingsWindow?.makeKeyAndOrderFront(nil)
     }
@@ -37,10 +42,12 @@ struct ZaiSubscriptionWidgetApp: App {
     @StateObject private var viewModel = UsageViewModel.shared
     
     var body: some Scene {
-        MenuBarExtra("Z.AI", image: "MenuBarIcon") {
+        MenuBarExtra {
             MenuBarView(viewModel: viewModel, onOpenSettings: {
                 appDelegate.showSettingsWindow()
             })
+        } label: {
+            MenuBarLabelView(viewModel: viewModel)
         }
         .menuBarExtraStyle(.window)
     }
