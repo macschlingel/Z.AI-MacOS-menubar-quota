@@ -12,6 +12,7 @@
 		A11111110000000000000003 /* ZaiAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A12222220000000000000003 /* ZaiAPIService.swift */; };
 		A11111110000000000000004 /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A12222220000000000000004 /* KeychainService.swift */; };
 		A11111110000000000000005 /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A12222220000000000000005 /* MenuBarView.swift */; };
+		A1111111000000000000000E /* MenuBarLabelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1222222000000000000000E /* MenuBarLabelView.swift */; };
 		A11111110000000000000006 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A12222220000000000000006 /* SettingsView.swift */; };
 		A11111110000000000000007 /* ModelUsage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A12222220000000000000007 /* ModelUsage.swift */; };
 		A11111110000000000000008 /* ToolUsage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A12222220000000000000008 /* ToolUsage.swift */; };
@@ -27,6 +28,7 @@
 		A12222220000000000000003 /* ZaiAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZaiAPIService.swift; sourceTree = "<group>"; };
 		A12222220000000000000004 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
 		A12222220000000000000005 /* MenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarView.swift; sourceTree = "<group>"; };
+		A1222222000000000000000E /* MenuBarLabelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarLabelView.swift; sourceTree = "<group>"; };
 		A12222220000000000000006 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A12222220000000000000007 /* ModelUsage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelUsage.swift; sourceTree = "<group>"; };
 		A12222220000000000000008 /* ToolUsage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolUsage.swift; sourceTree = "<group>"; };
@@ -111,6 +113,7 @@
 			isa = PBXGroup;
 			children = (
 				A12222220000000000000005 /* MenuBarView.swift */,
+				A1222222000000000000000E /* MenuBarLabelView.swift */,
 				A12222220000000000000006 /* SettingsView.swift */,
 			);
 			path = Views;
@@ -190,6 +193,7 @@
 				A11111110000000000000003 /* ZaiAPIService.swift in Sources */,
 				A11111110000000000000004 /* KeychainService.swift in Sources */,
 				A11111110000000000000005 /* MenuBarView.swift in Sources */,
+				A1111111000000000000000E /* MenuBarLabelView.swift in Sources */,
 				A11111110000000000000006 /* SettingsView.swift in Sources */,
 				A11111110000000000000007 /* ModelUsage.swift in Sources */,
 				A11111110000000000000008 /* ToolUsage.swift in Sources */,
