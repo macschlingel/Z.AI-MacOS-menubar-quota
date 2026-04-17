@@ -214,21 +214,48 @@ class UsageViewModel: ObservableObject {
         isLoading = true
         error = nil
         
-        do {
-            async let quotaLimitResult = apiService.fetchQuotaLimit(apiKey: currentKey)
-            async let modelUsageResult = apiService.fetchModelUsage(apiKey: currentKey)
-            async let toolUsageResult = apiService.fetchToolUsage(apiKey: currentKey)
+        // Use a task group or individual try? to ensure quota always loads even if others fail
+        await withTaskGroup(of: Void.self) { group in
+            group.addTask {
+                do {
+                    let limits = try await self.apiService.fetchQuotaLimit(apiKey: currentKey)
+                    await MainActor.run {
+                        self.quotaLimits = limits
+                    }
+                } catch {
+                    print("Failed to fetch quota: \(error)")
+                    await MainActor.run {
+                        self.error = error.localizedDescription
+                    }
+                }
+            }
             
-            let (limits, models, tools) = try await (quotaLimitResult, modelUsageResult, toolUsageResult)
+            group.addTask {
+                do {
+                    let models = try await self.apiService.fetchModelUsage(apiKey: currentKey)
+                    await MainActor.run {
+                        self.modelUsage = models
+                    }
+                } catch {
+                    print("Failed to fetch model usage: \(error)")
+                    // Non-critical failure, don't show error to user
+                }
+            }
             
-            self.quotaLimits = limits
-            self.modelUsage = models
-            self.toolUsage = tools
-            self.lastRefresh = Date()
-        } catch {
-            self.error = error.localizedDescription
+            group.addTask {
+                do {
+                    let tools = try await self.apiService.fetchToolUsage(apiKey: currentKey)
+                    await MainActor.run {
+                        self.toolUsage = tools
+                    }
+                } catch {
+                    print("Failed to fetch tool usage: \(error)")
+                    // Non-critical failure, don't show error to user
+                }
+            }
         }
         
+        self.lastRefresh = Date()
         isLoading = false
     }
     
