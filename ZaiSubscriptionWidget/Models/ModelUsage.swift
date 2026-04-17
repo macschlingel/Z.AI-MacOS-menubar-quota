@@ -1,9 +1,11 @@
 import Foundation
 
-struct ModelUsageItem: Codable {
+struct ModelUsageItem: Codable, Identifiable {
     let model: String
     let inputTokens: Int
     let outputTokens: Int
+    
+    var id: String { model }
     
     enum CodingKeys: String, CodingKey {
         case model
@@ -31,7 +33,7 @@ struct ModelUsageItem: Codable {
         formatNumber(totalTokens)
     }
     
-    private func formatNumber(_ value: Int) -> String {
+    func formatNumber(_ value: Int) -> String {
         if value >= 1_000_000 {
             return String(format: "%.1fM", Double(value) / 1_000_000)
         } else if value >= 1_000 {

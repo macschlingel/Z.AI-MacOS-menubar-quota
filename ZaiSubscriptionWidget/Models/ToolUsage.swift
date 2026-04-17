@@ -1,8 +1,10 @@
 import Foundation
 
-struct ToolUsageItem: Codable {
+struct ToolUsageItem: Codable, Identifiable {
     let tool: String
     let callCount: Int
+    
+    var id: String { tool }
     
     enum CodingKeys: String, CodingKey {
         case tool
