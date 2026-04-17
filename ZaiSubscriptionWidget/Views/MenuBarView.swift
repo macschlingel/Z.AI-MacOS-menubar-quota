@@ -66,7 +66,7 @@ struct MenuBarView: View {
             quotaSection
             
             Divider()
-            glmInfoSection
+            costWindowSection
             
             if let error = viewModel.error {
                 Divider()
@@ -178,35 +178,34 @@ struct MenuBarView: View {
         }
     }
     
-    private var glmInfoSection: some View {
+    private var costWindowSection: some View {
         let costWindow = viewModel.currentCostWindow
-        return VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text("GLM-5 Usage Info")
-                    .font(.headline)
-                Spacer()
+        return HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("GLM-5 Usage Window")
+                    .font(.caption2)
+                    .fontWeight(.medium)
+                    .foregroundColor(.secondary)
+                
                 HStack(spacing: 4) {
-                    Image(systemName: costWindow == .peak ? "flame.fill" : "leaf.fill")
-                    Text("\(costWindow.multiplier)x")
-                        .fontWeight(.bold)
+                    Text(costWindow.displayName)
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(costWindow == .peak ? .orange : .green)
+                    
+                    Text("(\(costWindow.multiplier)x Multiplier)")
+                        .font(.system(size: 10))
+                        .foregroundColor(.secondary)
                 }
-                .foregroundColor(costWindow == .peak ? .orange : .green)
             }
             
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    Text("Peak Hours:")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                    Text("14:00 – 18:00 (UTC+8)")
-                        .font(.subheadline)
-                }
-                
-                Text(costWindow == .peak ? "Currently in peak hours (3x usage)." : "Currently off-peak (\(costWindow.multiplier)x usage).")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
+            Spacer()
+            
+            Image(systemName: costWindow == .peak ? "flame.fill" : "leaf.fill")
+                .foregroundColor(costWindow == .peak ? .orange : .green)
+                .font(.caption)
         }
+        .padding(.horizontal, 4)
+    }
     }
     
     private func errorView(_ errorMessage: String) -> some View {
