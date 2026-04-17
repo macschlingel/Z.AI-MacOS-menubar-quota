@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import AppKit
 
 @MainActor
 class UsageViewModel: ObservableObject {
@@ -43,6 +44,18 @@ class UsageViewModel: ObservableObject {
             UserDefaults.standard.set(refreshInterval.rawValue, forKey: "refreshInterval")
             updateTimer()
         }
+    }
+    
+    @Published var showDockIcon = false {
+        didSet {
+            UserDefaults.standard.set(showDockIcon, forKey: "showDockIcon")
+            updateActivationPolicy()
+        }
+    }
+    
+    private func updateActivationPolicy() {
+        let policy: NSApplication.ActivationPolicy = showDockIcon ? .regular : .accessory
+        NSApp.setActivationPolicy(policy)
     }
     
     private var refreshTimer: Timer?
@@ -174,6 +187,9 @@ class UsageViewModel: ObservableObject {
            let interval = RefreshInterval(rawValue: intervalRaw) {
             refreshInterval = interval
         }
+        
+        showDockIcon = UserDefaults.standard.bool(forKey: "showDockIcon")
+        updateActivationPolicy()
     }
     
     private func updateTimer() {
