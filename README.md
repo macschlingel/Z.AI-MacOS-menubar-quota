@@ -3,7 +3,7 @@
   
   # Z.AI Subscription Widget
   
-  A native macOS menu bar app to monitor your Z.AI Coding Plan subscription usage
+  A native macOS menu bar app to monitor your Z.AI Coding Plan subscription usage across multiple accounts.
 </div>
 
 ---
@@ -12,17 +12,22 @@
 
 ## Features
 
-- **Quota Display**: View 5-hour token and monthly MCP usage percentages
-- **Model Usage**: Per-model token breakdown (input/output)
-- **Tool Usage**: MCP tool call statistics
-- **Auto-refresh**: Configurable automatic data refresh (1-30 min)
-- **Manual Refresh**: On-demand data update
-- **Secure Storage**: API key stored in macOS Keychain
+- **Multi-Account Support**: Manage and switch between multiple Z.AI accounts easily.
+- **Enhanced Menu Bar Display**: 
+  - Dynamic menu bar icon showing mini progress bars for current quotas.
+  - Real-time GLM-5 cost multiplier display (e.g., `1x` or `3x`) directly in the menu bar.
+- **Redesigned Quota Section**:
+  - Visual vertical progress bars for 5-hour, weekly, and monthly (MCP/Time) limits.
+  - **Quota Reset Countdown**: View exactly when your limits will reset if they've been reached.
+- **GLM-5 Usage Window**: Monitor peak and off-peak hours with the corresponding usage multiplier.
+- **Auto-refresh**: Configurable automatic data refresh (1-30 min).
+- **Hide Dock Icon**: Runs as a true menu bar extra without cluttering your Dock.
+- **Secure Storage**: API keys are securely stored in the macOS Keychain.
 
 ## Requirements
 
 - macOS 13.0 (Ventura) or later
-- Z.AI API key
+- One or more Z.AI API keys
 
 ## Installation
 
@@ -61,8 +66,8 @@ The app will be at `build/Build/Products/Release/ZaiSubscriptionWidget.app`
 1. Launch the app
 2. Click the menu bar icon
 3. Click the gear icon to open Settings
-4. Enter your Z.AI API key
-5. Click Save
+4. Add one or more accounts by entering a name and your Z.AI API key
+5. Switch between accounts using the picker in the menu bar dropdown
 
 Get your API key from: https://z.ai/manage-apikey/apikey-list
 
@@ -72,7 +77,7 @@ Get your API key from: https://z.ai/manage-apikey/apikey-list
 |----------|-------------|
 | `/api/monitor/usage/model-usage` | Model token statistics |
 | `/api/monitor/usage/tool-usage` | Tool call statistics |
-| `/api/monitor/usage/quota/limit` | Quota percentages |
+| `/api/monitor/usage/quota/limit` | Quota percentages and reset times |
 
 ## Project Structure
 
@@ -80,17 +85,19 @@ Get your API key from: https://z.ai/manage-apikey/apikey-list
 ZaiSubscriptionWidget/
 ├── ZaiSubscriptionWidgetApp.swift  # App entry point
 ├── Models/
+│   ├── Account.swift               # Multi-account data model
 │   ├── ModelUsage.swift            # Model usage data model
 │   ├── ToolUsage.swift             # Tool usage data model
-│   └── QuotaLimit.swift            # Quota limit data model
+│   └── QuotaLimit.swift            # Quota limit & reset time model
 ├── Services/
 │   ├── ZaiAPIService.swift         # API client
-│   └── KeychainService.swift       # Secure key storage
+│   └── KeychainService.swift       # Secure multi-account key storage
 ├── ViewModels/
-│   └── UsageViewModel.swift        # Business logic
+│   └── UsageViewModel.swift        # Business logic & cost window management
 ├── Views/
-│   ├── MenuBarView.swift           # Menu bar UI
-│   └── SettingsView.swift          # Preferences UI
+│   ├── MenuBarView.swift           # Main dropdown UI
+│   ├── MenuBarLabelView.swift      # Dynamic menu bar icon UI
+│   └── SettingsView.swift          # Account management & preferences UI
 └── Assets.xcassets/                # App icons and assets
 ```
 
