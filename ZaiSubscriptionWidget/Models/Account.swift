@@ -4,11 +4,13 @@ struct Account: Codable, Identifiable, Hashable {
     let id: UUID
     var name: String
     var apiKey: String
+    var showInMenuBar: Bool = true
     
-    init(id: UUID = UUID(), name: String, apiKey: String) {
+    init(id: UUID = UUID(), name: String, apiKey: String, showInMenuBar: Bool = true) {
         self.id = id
         self.name = name
         self.apiKey = apiKey
+        self.showInMenuBar = showInMenuBar
     }
     
     /// Returns the API key with only the last 4 characters visible
