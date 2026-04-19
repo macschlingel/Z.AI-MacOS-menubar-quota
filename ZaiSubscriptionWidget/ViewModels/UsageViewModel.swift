@@ -20,6 +20,7 @@ class UsageViewModel: ObservableObject {
     @Published var modelUsage: [ModelUsageItem] = []
     @Published var toolUsage: [ToolUsageItem] = []
     @Published var quotaLimits: [QuotaLimitItem] = []
+    @Published var accountQuotaLimits: [UUID: [QuotaLimitItem]] = [:]
     
     @Published var isLoading = false
     @Published var error: String?
@@ -50,6 +51,18 @@ class UsageViewModel: ObservableObject {
         didSet {
             UserDefaults.standard.set(showDockIcon, forKey: "showDockIcon")
             updateActivationPolicy()
+        }
+    }
+    
+    @Published var showMenuBarCharts = true {
+        didSet {
+            UserDefaults.standard.set(showMenuBarCharts, forKey: "showMenuBarCharts")
+        }
+    }
+    
+    @Published var showGLMMultiplier = true {
+        didSet {
+            UserDefaults.standard.set(showGLMMultiplier, forKey: "showGLMMultiplier")
         }
     }
     
@@ -189,6 +202,12 @@ class UsageViewModel: ObservableObject {
         }
         
         showDockIcon = UserDefaults.standard.bool(forKey: "showDockIcon")
+        if UserDefaults.standard.object(forKey: "showMenuBarCharts") != nil {
+            showMenuBarCharts = UserDefaults.standard.bool(forKey: "showMenuBarCharts")
+        }
+        if UserDefaults.standard.object(forKey: "showGLMMultiplier") != nil {
+            showGLMMultiplier = UserDefaults.standard.bool(forKey: "showGLMMultiplier")
+        }
         updateActivationPolicy()
     }
     
@@ -223,9 +242,23 @@ class UsageViewModel: ObservableObject {
                         self.quotaLimits = limits
                     }
                 } catch {
-                    print("Failed to fetch quota: \(error)")
+                    print("Failed to fetch primary quota: \(error)")
                     await MainActor.run {
                         self.error = error.localizedDescription
+                    }
+                }
+            }
+            
+            // Fetch quotas for all accounts configured to show in menu bar
+            for account in accounts where account.showInMenuBar {
+                group.addTask {
+                    do {
+                        let limits = try await self.apiService.fetchQuotaLimit(apiKey: account.apiKey)
+                        await MainActor.run {
+                            self.accountQuotaLimits[account.id] = limits
+                        }
+                    } catch {
+                        print("Failed to fetch quota for account \(account.name): \(error)")
                     }
                 }
             }
@@ -261,12 +294,11 @@ class UsageViewModel: ObservableObject {
     
     // MARK: - Account Management Methods
     
-    func addAccount(name: String, apiKey: String) {
+    func addAccount(name: String, apiKey: String, showInMenuBar: Bool = true) {
         let trimmedKey = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedKey.isEmpty else { return }
-        
-        let account = Account(name: name.trimmingCharacters(in: .whitespacesAndNewlines), apiKey: trimmedKey)
-        
+
+        let account = Account(name: name.trimmingCharacters(in: .whitespacesAndNewlines), apiKey: trimmedKey, showInMenuBar: showInMenuBar)        
         do {
             try KeychainService.shared.saveAccount(account)
             accounts.append(account)

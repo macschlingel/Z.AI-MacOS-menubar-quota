@@ -7,6 +7,7 @@ struct SettingsView: View {
     @State private var accountToEdit: Account?
     @State private var newAccountName: String = ""
     @State private var newAccountKey: String = ""
+    @State private var newAccountShowInMenuBar: Bool = true
     @State private var showingSaveConfirmation = false
     
     var body: some View {
@@ -21,7 +22,7 @@ struct SettingsView: View {
                     Label("About", systemImage: "info.circle")
                 }
         }
-        .frame(width: 450, height: 400)
+        .frame(minWidth: 450, minHeight: 400)
         .sheet(isPresented: $showingAddAccountSheet) {
             addAccountSheet
         }
@@ -147,6 +148,8 @@ struct SettingsView: View {
                 SecureField("API Key", text: $newAccountKey)
                     .textFieldStyle(.roundedBorder)
                 
+                Toggle("Show in Menu Bar", isOn: $newAccountShowInMenuBar)
+
                 Text("Get your API key from z.ai/manage-apikey/apikey-list")
                     .font(.caption)
                     .foregroundColor(.secondary)
@@ -169,7 +172,8 @@ struct SettingsView: View {
             }
             .padding(.horizontal)
         }
-        .frame(width: 350, height: 280)
+        .padding(.vertical, 20)
+        .frame(width: 350, height: 420)
     }
     
     private func editAccountSheet(_ account: Account) -> some View {
@@ -183,6 +187,8 @@ struct SettingsView: View {
                 
                 SecureField("API Key (leave empty to keep current)", text: $newAccountKey)
                     .textFieldStyle(.roundedBorder)
+                    
+                Toggle("Show in Menu Bar", isOn: $newAccountShowInMenuBar)
             }
             .formStyle(.grouped)
             
@@ -202,10 +208,12 @@ struct SettingsView: View {
             }
             .padding(.horizontal)
         }
-        .frame(width: 350, height: 240)
+        .padding(.vertical, 20)
+        .frame(width: 350, height: 380)
         .onAppear {
             newAccountName = account.name
             newAccountKey = ""
+            newAccountShowInMenuBar = account.showInMenuBar
         }
     }
     
@@ -245,7 +253,7 @@ struct SettingsView: View {
     }
     
     private func addAccount() {
-        viewModel.addAccount(name: newAccountName, apiKey: newAccountKey)
+        viewModel.addAccount(name: newAccountName, apiKey: newAccountKey, showInMenuBar: newAccountShowInMenuBar)
         dismissAddSheet()
         showSaveConfirmation()
     }
@@ -253,6 +261,7 @@ struct SettingsView: View {
     private func saveEditedAccount(_ account: Account) {
         var updated = account
         updated.name = newAccountName.trimmingCharacters(in: .whitespacesAndNewlines)
+        updated.showInMenuBar = newAccountShowInMenuBar
         
         // Only update API key if a new one was entered
         let trimmedKey = newAccountKey.trimmingCharacters(in: .whitespacesAndNewlines)
